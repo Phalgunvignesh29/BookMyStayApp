@@ -1,78 +1,116 @@
-/**
- * =========================================================
- * Use Case 2: Basic Room Types & Static Availability
- * Combined in ONE file
- * =========================================================
- */
+import java.util.*;
 
-abstract class Room {
+// =============================
+// DOMAIN MODEL - Room
+// =============================
+class Room {
 
-    protected int numberOfBeds;
-    protected int squareFeet;
-    protected double pricePerNight;
+    private int beds;
+    private int size;
+    private double price;
 
-    public Room(int numberOfBeds, int squareFeet, double pricePerNight) {
-        this.numberOfBeds = numberOfBeds;
-        this.squareFeet = squareFeet;
-        this.pricePerNight = pricePerNight;
+    public Room(int beds, int size, double price) {
+        this.beds = beds;
+        this.size = size;
+        this.price = price;
     }
 
-    public void displayRoomDetails() {
-        System.out.println("Beds: " + numberOfBeds);
-        System.out.println("Size: " + squareFeet + " sqft");
-        System.out.println("Price per night: " + pricePerNight);
+    public void displayDetails() {
+        System.out.println("Beds: " + beds);
+        System.out.println("Size: " + size + " sqft");
+        System.out.println("Price per night: " + price);
     }
 }
 
-// Single Room
-class SingleRoom extends Room {
-    public SingleRoom() {
-        super(1, 250, 1500.0);
+// =============================
+// INVENTORY (STATE HOLDER)
+// =============================
+class RoomInventory {
+
+    private Map<String, Integer> availability;
+
+    public RoomInventory() {
+        availability = new HashMap<>();
+    }
+
+    public void addRoom(String type, int count) {
+        availability.put(type, count);
+    }
+
+    // READ-ONLY ACCESS
+    public Map<String, Integer> getRoomAvailability() {
+        return availability;
     }
 }
 
-// Double Room
-class DoubleRoom extends Room {
-    public DoubleRoom() {
-        super(2, 400, 2500.0);
+// =============================
+// SEARCH SERVICE (READ-ONLY)
+// =============================
+class RoomSearchService {
+
+    public void searchAvailableRooms(
+            RoomInventory inventory,
+            Room singleRoom,
+            Room doubleRoom,
+            Room suiteRoom) {
+
+        System.out.println("Room Search\n");
+
+        // Get availability (READ-ONLY)
+        Map<String, Integer> availability = inventory.getRoomAvailability();
+
+        // Single Room
+        if (availability.get("Single") > 0) {
+            System.out.println("Single Room:");
+            singleRoom.displayDetails();
+            System.out.println("Available: " + availability.get("Single"));
+            System.out.println();
+        }
+
+        // Double Room
+        if (availability.get("Double") > 0) {
+            System.out.println("Double Room:");
+            doubleRoom.displayDetails();
+            System.out.println("Available: " + availability.get("Double"));
+            System.out.println();
+        }
+
+        // Suite Room
+        if (availability.get("Suite") > 0) {
+            System.out.println("Suite Room:");
+            suiteRoom.displayDetails();
+            System.out.println("Available: " + availability.get("Suite"));
+        }
     }
 }
 
-// Suite Room
-class SuiteRoom extends Room {
-    public SuiteRoom() {
-        super(3, 750, 5000.0);
-    }
-}
-
-// Main Class
+// =============================
+// MAIN CLASS
+// =============================
 public class UseCaseInitialization {
 
     public static void main(String[] args) {
 
-        System.out.println("Hotel Room Initialization\n");
+        // Create Rooms
+        Room singleRoom = new Room(1, 250, 1500.0);
+        Room doubleRoom = new Room(2, 400, 2500.0);
+        Room suiteRoom = new Room(3, 750, 5000.0);
 
-        // Create objects
-        Room single = new SingleRoom();
-        Room doubleRoom = new DoubleRoom();
-        Room suite = new SuiteRoom();
+        // Create Inventory
+        RoomInventory inventory = new RoomInventory();
+        inventory.addRoom("Single", 5);
+        inventory.addRoom("Double", 3);
+        inventory.addRoom("Suite", 2);
 
-        // Availability
-        int singleAvailable = 5;
-        int doubleAvailable = 3;
-        int suiteAvailable = 2;
+        // Search Service
+        RoomSearchService searchService = new RoomSearchService();
 
-        // Display
-        System.out.println("Single Room:");
-        single.displayRoomDetails();
-        System.out.println("Available: " + singleAvailable + "\n");
-
-        System.out.println("Double Room:");
-        doubleRoom.displayRoomDetails();
-        System.out.println("Available: " + doubleAvailable + "\n");
-
-        System.out.println("Suite Room:");
-        suite.displayRoomDetails();
-        System.out.println("Available: " + suiteAvailable);
+        // Perform Search
+        searchService.searchAvailableRooms(
+                inventory,
+                singleRoom,
+                doubleRoom,
+                suiteRoom
+        );
     }
 }
